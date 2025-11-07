@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint Alkalmazás - Kaleidoszkóp Móddal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Paint Alkalmazás</h1>
+        </header>
+
+        <div class="toolbar">
+            <!-- Rajzolási eszközök -->
+            <div class="tool-section">
+                <h3>Eszközök</h3>
+                <div class="tools">
+                    <button class="tool-btn active" data-tool="freehand" title="Szabadkézi rajzolás">
+                        ✏️ Ecset
+                    </button>
+                    <button class="tool-btn" data-tool="rectangle" title="Téglalap rajzolása">
+                        ▭ Téglalap
+                    </button>
+                    <button class="tool-btn" data-tool="circle" title="Kör rajzolása">
+                        ⭕ Kör
+                    </button>
+                    <button class="tool-btn" data-tool="eraser" title="Radír">
+                        🧹 Radír
+                    </button>
+                </div>
+            </div>
+
+            <!-- Színválasztó -->
+            <div class="tool-section">
+                <h3>Színek</h3>
+                <div class="color-palette">
+                    <button class="color-btn active" data-color="#000000" style="background: #000000;" title="Fekete"></button>
+                    <button class="color-btn" data-color="#ffffff" style="background: #ffffff;" title="Fehér"></button>
+                    <button class="color-btn" data-color="#ff0000" style="background: #ff0000;" title="Piros"></button>
+                    <button class="color-btn" data-color="#00ff00" style="background: #00ff00;" title="Zöld"></button>
+                    <button class="color-btn" data-color="#0000ff" style="background: #0000ff;" title="Kék"></button>
+                    <button class="color-btn" data-color="#ffff00" style="background: #ffff00;" title="Sárga"></button>
+                    <button class="color-btn" data-color="#ff00ff" style="background: #ff00ff;" title="Lila"></button>
+                    <button class="color-btn" data-color="#00ffff" style="background: #00ffff;" title="Cyan"></button>
+                    <button class="color-btn" data-color="#ffa500" style="background: #ffa500;" title="Narancs"></button>
+                    <button class="color-btn" data-color="#800080" style="background: #800080;" title="Bíbor"></button>
+                    <button class="color-btn" data-color="#008000" style="background: #008000;" title="Sötétzöld"></button>
+                    <button class="color-btn" data-color="#808080" style="background: #808080;" title="Szürke"></button>
+                </div>
+                <div class="custom-color">
+                    <label for="colorPicker">Egyéni szín:</label>
+                    <input type="color" id="colorPicker" value="#000000">
+                </div>
+            </div>
+
+            <!-- Ecsetméret -->
+            <div class="tool-section">
+                <h3>Ecsetméret</h3>
+                <input type="range" id="brushSize" min="1" max="50" value="3">
+                <span id="brushSizeValue">3px</span>
+            </div>
+
+            <!-- Kaleidoszkóp mód -->
+            <div class="tool-section">
+                <h3>Kaleidoszkóp</h3>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="kaleidoscopeMode">
+                    <span class="slider"></span>
+                </label>
+                <label for="kaleidoscopeMode">Kaleidoszkóp mód</label>
+                <div class="kaleidoscope-settings">
+                    <label for="symmetryCount">Tengelyek száma:</label>
+                    <input type="number" id="symmetryCount" min="2" max="12" value="6">
+                </div>
+            </div>
+
+            <!-- Műveletek -->
+            <div class="tool-section">
+                <h3>Műveletek</h3>
+                <div class="action-buttons">
+                    <button id="undoBtn" title="Visszavonás">↶ Vissza</button>
+                    <button id="redoBtn" title="Újra">↷ Újra</button>
+                    <button id="clearBtn" title="Vászon törlése">🗑️ Törlés</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
