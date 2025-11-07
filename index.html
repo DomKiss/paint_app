@@ -20,15 +20,30 @@
                     <button class="tool-btn active" data-tool="freehand" title="Szabadkézi rajzolás">
                         ✏️ Ecset
                     </button>
+                    <button class="tool-btn" data-tool="line" title="Egyenes vonal rajzolása">
+                        📏 Vonal
+                    </button>
                     <button class="tool-btn" data-tool="rectangle" title="Téglalap rajzolása">
                         ▭ Téglalap
                     </button>
                     <button class="tool-btn" data-tool="circle" title="Kör rajzolása">
                         ⭕ Kör
                     </button>
+                    <button class="tool-btn" data-tool="triangle" title="Háromszög rajzolása">
+                        △ Háromszög
+                    </button>
+                    <button class="tool-btn" data-tool="eyedropper" title="Színminta vevő">
+                        💧 Pipetta
+                    </button>
                     <button class="tool-btn" data-tool="eraser" title="Radír">
                         🧹 Radír
                     </button>
+                </div>
+                <div class="fill-option">
+                    <label>
+                        <input type="checkbox" id="fillShape">
+                        <span>Kitöltés</span>
+                    </label>
                 </div>
             </div>
 
@@ -48,6 +63,18 @@
                     <button class="color-btn" data-color="#800080" style="background: #800080;" title="Bíbor"></button>
                     <button class="color-btn" data-color="#008000" style="background: #008000;" title="Sötétzöld"></button>
                     <button class="color-btn" data-color="#808080" style="background: #808080;" title="Szürke"></button>
+                    <button class="color-btn" data-color="#ff6b6b" style="background: #ff6b6b;" title="Rózsaszín"></button>
+                    <button class="color-btn" data-color="#4ecdc4" style="background: #4ecdc4;" title="Türkiz"></button>
+                    <button class="color-btn" data-color="#ffe66d" style="background: #ffe66d;" title="Citromsárga"></button>
+                    <button class="color-btn" data-color="#95e1d3" style="background: #95e1d3;" title="Mentazöld"></button>
+                    <button class="color-btn" data-color="#ff8c94" style="background: #ff8c94;" title="Korall"></button>
+                    <button class="color-btn" data-color="#a8dadc" style="background: #a8dadc;" title="Világoskék"></button>
+                    <button class="color-btn" data-color="#c77dff" style="background: #c77dff;" title="Világos lila"></button>
+                    <button class="color-btn" data-color="#7209b7" style="background: #7209b7;" title="Sötétlila"></button>
+                    <button class="color-btn" data-color="#f72585" style="background: #f72585;" title="Magenta"></button>
+                    <button class="color-btn" data-color="#8b4513" style="background: #8b4513;" title="Barna"></button>
+                    <button class="color-btn" data-color="#2f4f4f" style="background: #2f4f4f;" title="Sötétszürke"></button>
+                    <button class="color-btn" data-color="#d4a574" style="background: #d4a574;" title="Arany"></button>
                 </div>
                 <div class="custom-color">
                     <label for="colorPicker">Egyéni szín:</label>
@@ -58,21 +85,30 @@
             <!-- Ecsetméret -->
             <div class="tool-section">
                 <h3>Ecsetméret</h3>
-                <input type="range" id="brushSize" min="1" max="50" value="3">
-                <span id="brushSizeValue">3px</span>
+                <div class="brush-size-control">
+                    <input type="range" id="brushSize" min="1" max="50" value="3">
+                    <input type="number" id="brushSizeInput" min="1" max="50" value="3">
+                    <span>px</span>
+                </div>
             </div>
 
             <!-- Kaleidoszkóp mód -->
             <div class="tool-section">
                 <h3>Kaleidoszkóp</h3>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="kaleidoscopeMode">
-                    <span class="slider"></span>
-                </label>
-                <label for="kaleidoscopeMode">Kaleidoszkóp mód</label>
+                <div class="kaleidoscope-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="kaleidoscopeMode">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="kaleidoscopeMode">Kaleidoszkóp mód</label>
+                </div>
                 <div class="kaleidoscope-settings">
-                    <label for="symmetryCount">Tengelyek száma:</label>
-                    <input type="number" id="symmetryCount" min="2" max="12" value="6">
+                    <label for="symmetryCount">Tengelyek:</label>
+                    <div class="number-spinner">
+                        <button class="spinner-btn" id="decrementSymmetry">−</button>
+                        <input type="number" id="symmetryCount" min="2" max="12" value="6">
+                        <button class="spinner-btn" id="incrementSymmetry">+</button>
+                    </div>
                 </div>
             </div>
 
@@ -83,6 +119,7 @@
                     <button id="undoBtn" title="Visszavonás">↶ Vissza</button>
                     <button id="redoBtn" title="Újra">↷ Újra</button>
                     <button id="clearBtn" title="Vászon törlése">🗑️ Törlés</button>
+                    <button id="saveBtn" title="Rajz mentése PNG-ként">💾 Mentés</button>
                 </div>
             </div>
         </div>

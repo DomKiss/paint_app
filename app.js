@@ -13,6 +13,7 @@ let currentColor = '#000000';
 let brushSize = 3;
 let kaleidoscopeMode = false;
 let symmetryCount = 6;
+let fillShape = false;
 
 // For shape drawing
 let startX, startY;
@@ -36,6 +37,8 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
         // Update cursor based on tool
         if (currentTool === 'eraser') {
             canvas.style.cursor = 'cell';
+        } else if (currentTool === 'eyedropper') {
+            canvas.style.cursor = 'copy';
         } else {
             canvas.style.cursor = 'crosshair';
         }
@@ -59,10 +62,24 @@ document.getElementById('colorPicker').addEventListener('input', (e) => {
     document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
 });
 
+// Fill shape checkbox
+document.getElementById('fillShape').addEventListener('change', (e) => {
+    fillShape = e.target.checked;
+});
+
 // Brush size
 document.getElementById('brushSize').addEventListener('input', (e) => {
     brushSize = e.target.value;
-    document.getElementById('brushSizeValue').textContent = brushSize + 'px';
+    document.getElementById('brushSizeInput').value = brushSize;
+});
+
+document.getElementById('brushSizeInput').addEventListener('input', (e) => {
+    let value = parseInt(e.target.value);
+    if (value < 1) value = 1;
+    if (value > 50) value = 50;
+    brushSize = value;
+    document.getElementById('brushSize').value = value;
+    e.target.value = value;
 });
 
 // Kaleidoscope mode
@@ -71,13 +88,39 @@ document.getElementById('kaleidoscopeMode').addEventListener('change', (e) => {
 });
 
 document.getElementById('symmetryCount').addEventListener('input', (e) => {
-    symmetryCount = parseInt(e.target.value);
+    let value = parseInt(e.target.value);
+    if (value < 2) value = 2;
+    if (value > 12) value = 12;
+    symmetryCount = value;
+    e.target.value = value;
 });
 
-// Undo/Redo/Clear
+// Symmetry spinner buttons
+document.getElementById('decrementSymmetry').addEventListener('click', () => {
+    const input = document.getElementById('symmetryCount');
+    let value = parseInt(input.value);
+    if (value > 2) {
+        value--;
+        input.value = value;
+        symmetryCount = value;
+    }
+});
+
+document.getElementById('incrementSymmetry').addEventListener('click', () => {
+    const input = document.getElementById('symmetryCount');
+    let value = parseInt(input.value);
+    if (value < 12) {
+        value++;
+        input.value = value;
+        symmetryCount = value;
+    }
+});
+
+// Undo/Redo/Clear/Save
 document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('redoBtn').addEventListener('click', redo);
 document.getElementById('clearBtn').addEventListener('click', clearCanvas);
+document.getElementById('saveBtn').addEventListener('click', saveImage);
 
 // Mouse events
 canvas.addEventListener('mousedown', startDrawing);
@@ -91,10 +134,17 @@ canvas.addEventListener('touchmove', handleTouchMove);
 canvas.addEventListener('touchend', stopDrawing);
 
 function startDrawing(e) {
-    isDrawing = true;
     const rect = canvas.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
+
+    // Eyedropper tool - pick color immediately
+    if (currentTool === 'eyedropper') {
+        pickColor(startX, startY);
+        return;
+    }
+
+    isDrawing = true;
 
     if (currentTool === 'freehand' || currentTool === 'eraser') {
         ctx.beginPath();
@@ -120,10 +170,14 @@ function draw(e) {
         drawFreehand(x, y);
     } else if (currentTool === 'eraser') {
         erase(x, y);
+    } else if (currentTool === 'line') {
+        drawLine(x, y);
     } else if (currentTool === 'rectangle') {
         drawRectangle(x, y);
     } else if (currentTool === 'circle') {
         drawCircle(x, y);
+    } else if (currentTool === 'triangle') {
+        drawTriangle(x, y);
     }
 }
 
@@ -163,6 +217,22 @@ function erase(x, y) {
     ctx.moveTo(x, y);
 }
 
+function drawLine(x, y) {
+    ctx.putImageData(snapshot, 0, 0);
+
+    if (kaleidoscopeMode) {
+        drawKaleidoscopeLine(startX, startY, x, y);
+    } else {
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = brushSize;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+}
+
 function drawRectangle(x, y) {
     ctx.putImageData(snapshot, 0, 0);
 
@@ -173,8 +243,14 @@ function drawRectangle(x, y) {
         drawKaleidoscopeRectangle(startX, startY, width, height);
     } else {
         ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
         ctx.lineWidth = brushSize;
-        ctx.strokeRect(startX, startY, width, height);
+
+        if (fillShape) {
+            ctx.fillRect(startX, startY, width, height);
+        } else {
+            ctx.strokeRect(startX, startY, width, height);
+        }
     }
 }
 
@@ -187,11 +263,75 @@ function drawCircle(x, y) {
         drawKaleidoscopeCircle(startX, startY, radius);
     } else {
         ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
         ctx.lineWidth = brushSize;
         ctx.beginPath();
         ctx.arc(startX, startY, radius, 0, Math.PI * 2);
-        ctx.stroke();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
     }
+}
+
+function drawTriangle(x, y) {
+    ctx.putImageData(snapshot, 0, 0);
+
+    // Calculate third point for equilateral-ish triangle
+    const baseWidth = x - startX;
+    const height = y - startY;
+    const x1 = startX;
+    const y1 = startY;
+    const x2 = x;
+    const y2 = startY;
+    const x3 = startX + baseWidth / 2;
+    const y3 = y;
+
+    if (kaleidoscopeMode) {
+        drawKaleidoscopeTriangle(x1, y1, x2, y2, x3, y3);
+    } else {
+        ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = brushSize;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.closePath();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
+    }
+}
+
+function pickColor(x, y) {
+    const imageData = ctx.getImageData(x, y, 1, 1);
+    const pixel = imageData.data;
+    const r = pixel[0];
+    const g = pixel[1];
+    const b = pixel[2];
+
+    // Convert RGB to hex
+    const hexColor = '#' + [r, g, b].map(val => {
+        const hex = val.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+
+    currentColor = hexColor;
+    document.getElementById('colorPicker').value = hexColor;
+
+    // Update active color button if it matches
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.color === hexColor) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 // Kaleidoscope functions
@@ -276,14 +416,25 @@ function drawKaleidoscopeRectangle(x, y, width, height) {
         ctx.translate(-centerX, -centerY);
 
         ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
         ctx.lineWidth = brushSize;
-        ctx.strokeRect(x, y, width, height);
+
+        if (fillShape) {
+            ctx.fillRect(x, y, width, height);
+        } else {
+            ctx.strokeRect(x, y, width, height);
+        }
 
         // Mirror
         ctx.translate(centerX, centerY);
         ctx.scale(-1, 1);
         ctx.translate(-centerX, -centerY);
-        ctx.strokeRect(x, y, width, height);
+
+        if (fillShape) {
+            ctx.fillRect(x, y, width, height);
+        } else {
+            ctx.strokeRect(x, y, width, height);
+        }
 
         ctx.restore();
     }
@@ -303,10 +454,16 @@ function drawKaleidoscopeCircle(x, y, radius) {
         const rotY = relX * Math.sin(angle) + relY * Math.cos(angle) + centerY;
 
         ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
         ctx.lineWidth = brushSize;
         ctx.beginPath();
         ctx.arc(rotX, rotY, radius, 0, Math.PI * 2);
-        ctx.stroke();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
 
         // Mirror
         const mirrorX = (centerX - relX) * Math.cos(angle) - relY * Math.sin(angle) + centerX;
@@ -314,7 +471,66 @@ function drawKaleidoscopeCircle(x, y, radius) {
 
         ctx.beginPath();
         ctx.arc(mirrorX, mirrorY, radius, 0, Math.PI * 2);
-        ctx.stroke();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
+    }
+}
+
+function drawKaleidoscopeTriangle(x1, y1, x2, y2, x3, y3) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    for (let i = 0; i < symmetryCount; i++) {
+        const angle = (Math.PI * 2 * i) / symmetryCount;
+
+        // Transform all three points
+        const points = [
+            [x1 - centerX, y1 - centerY],
+            [x2 - centerX, y2 - centerY],
+            [x3 - centerX, y3 - centerY]
+        ];
+
+        const rotatedPoints = points.map(([x, y]) => [
+            x * Math.cos(angle) - y * Math.sin(angle) + centerX,
+            x * Math.sin(angle) + y * Math.cos(angle) + centerY
+        ]);
+
+        ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = brushSize;
+        ctx.beginPath();
+        ctx.moveTo(rotatedPoints[0][0], rotatedPoints[0][1]);
+        ctx.lineTo(rotatedPoints[1][0], rotatedPoints[1][1]);
+        ctx.lineTo(rotatedPoints[2][0], rotatedPoints[2][1]);
+        ctx.closePath();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
+
+        // Mirror
+        const mirroredPoints = points.map(([x, y]) => [
+            (centerX - x - centerX) * Math.cos(angle) - y * Math.sin(angle) + centerX,
+            (centerX - x - centerX) * Math.sin(angle) + y * Math.cos(angle) + centerY
+        ]);
+
+        ctx.beginPath();
+        ctx.moveTo(mirroredPoints[0][0], mirroredPoints[0][1]);
+        ctx.lineTo(mirroredPoints[1][0], mirroredPoints[1][1]);
+        ctx.lineTo(mirroredPoints[2][0], mirroredPoints[2][1]);
+        ctx.closePath();
+
+        if (fillShape) {
+            ctx.fill();
+        } else {
+            ctx.stroke();
+        }
     }
 }
 
@@ -359,6 +575,15 @@ function clearCanvas() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         saveState();
     }
+}
+
+function saveImage() {
+    // Create a temporary link element
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    link.download = `paint-drawing-${timestamp}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
 
 // Touch support functions
